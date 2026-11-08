@@ -4,6 +4,7 @@
   config,
   lib,
   osConfig,
+  pkgs,
   ...
 }:
 
@@ -19,16 +20,56 @@ let
     halign = "center";
     valign = "center";
   };
+  hyprlock = lib.getExe config.programs.hyprlock.package;
+  swayidle = lib.getExe pkgs.swayidle;
+  off = ''swaymsg "output * power off"'';
+  on = ''swaymsg "output * power on"'';
+
+  # Locks and blanks the screens; any input turns them back on. The first
+  # blank happens after 1s, later ones after 10s of no input so the screen
+  # doesn't go dark mid-password.
+  lock = pkgs.writeShellScript "lock" ''
+    pidof hyprlock >/dev/null && exit 0
+
+    ${hyprlock} &
+    lock=$!
+
+    # Phase one ends on the first input: the resume handler kills its own
+    # swayidle. swayidle double-forks its commands, so $PPID there is not
+    # swayidle; instead `exec` makes the inner bash's $$ swayidle's pid.
+    # shellcheck disable=SC2016
+    "$BASH" -c 'exec ${swayidle} timeout 1 "$1" resume "$2; kill $$"' _ '${off}' '${on}' &
+    first=$!
+    wait -n "$lock" "$first" || true
+
+    if kill -0 "$lock" 2>/dev/null; then
+      ${swayidle} timeout 10 '${off}' resume '${on}' &
+      second=$!
+      wait "$lock" || true
+      kill "$second" 2>/dev/null
+    fi
+
+    kill "$first" 2>/dev/null
+    ${on}
+  '';
 in
 {
+  options.hyprlock.lockCommand = lib.mkOption {
+    type = lib.types.str;
+    readOnly = true;
+    default = "${lock}";
+    description = "Lock the session and turn the screens off until there is input.";
+  };
+
   options.hyprlock.lockOnLogin = lib.mkOption {
     type = lib.types.bool;
     default = true;
     description = "Start hyprlock together with sway.";
   };
 
+  # plain hyprlock here: the screens stay on at boot
   config.wayland.windowManager.sway.config.startup = lib.mkIf config.hyprlock.lockOnLogin [
-    { command = lib.getExe config.programs.hyprlock.package; }
+    { command = hyprlock; }
   ];
 
   config.programs.hyprlock = {

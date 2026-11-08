@@ -134,7 +134,7 @@ in
 
       modes = {
         ${modeSystem} = {
-          l = ''exec hyprlock, mode "default"'';
+          l = ''exec ${config.hyprlock.lockCommand}, mode "default"'';
           s = ''exec systemctl suspend, mode "default"'';
           h = ''exec systemctl hibernate, mode "default"'';
           r = ''exec systemctl reboot, mode "default"'';
@@ -167,6 +167,6 @@ in
 
   services.swayidle = {
     enable = true;
-    events.before-sleep = "${lib.getExe config.programs.hyprlock.package}";
+    events.before-sleep = config.hyprlock.lockCommand;
   };
 }
