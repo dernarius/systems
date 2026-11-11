@@ -8,6 +8,12 @@
 
 let
   lazy = pkgs.callPackage ./lazy.nix { stateDir = "${config.xdg.stateHome}/lazy"; };
+
+  # rip a CD to FLAC with cover art, then eject it if that succeeded.
+  # A script rather than a shell alias, since zsh isn't managed by home-manager.
+  rip = pkgs.writeShellScriptBin "rip" ''
+    ${pkgs.abcde}/bin/abcde -o flac -a default,getalbumart "$@" && ${pkgs.util-linux}/bin/eject
+  '';
 in
 {
   home.packages =
@@ -128,6 +134,7 @@ in
         };
       })
     ])
+    ++ [ rip ]
     ++ (with pkgs-unstable; [
       boilr
       claude-code
