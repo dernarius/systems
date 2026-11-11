@@ -33,7 +33,6 @@ diff target=host: stage
 # update all inputs (or just the named ones), switch, commit flake.lock
 update *inputs: stage
     nix flake update {{ inputs }}
-    {{ root }} nixos-rebuild switch --flake .#{{ host }}
     -git commit -m "flake update" flake.lock
 
 # roll back to the previous system generation
