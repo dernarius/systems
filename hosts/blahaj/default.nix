@@ -23,13 +23,6 @@
   # boot menu and early console aren't low-res.
   boot.loader.systemd-boot.consoleMode = "max";
 
-  # Newer Mesa (RADV/radeonsi) from unstable for the RX 9070 XT and new games.
-  # The kernel side (amdgpu) is already current via linuxPackages_latest.
-  hardware.graphics = {
-    package = pkgs-unstable.mesa;
-    package32 = pkgs-unstable.pkgsi686Linux.mesa;
-  };
-
   hardware.cpu.amd.updateMicrocode = true;
   hardware.enableAllFirmware = true;
   hardware.xpadneo.enable = true;
