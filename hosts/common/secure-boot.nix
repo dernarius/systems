@@ -21,4 +21,11 @@
     enable = true;
     pkiBundle = "/var/lib/sbctl";
   };
+
+  # Show a TPM-sealed TOTP on the Plymouth screen; only type the LUKS
+  # passphrase if it matches the authenticator app. The secret is created at
+  # runtime with `just totp-setup` (PCRs 0,2,7: firmware, option ROMs, Secure
+  # Boot state/keys). Not PCR 4: lanzaboote changes it every generation.
+  # Re-run `just totp-reseal` after a BIOS update or Secure Boot key change.
+  boot.plymouth.tpm2-totp.enable = true;
 }

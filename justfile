@@ -47,6 +47,27 @@ rollback:
 firmware on="true":
     {{ root }} bootctl reboot-to-firmware {{ on }}
 
+# PCRs the boot-time TOTP is sealed to (see hosts/common/secure-boot.nix)
+totp_pcrs := "0,2,7"
+
+# create the TPM-sealed boot TOTP secret and show its QR code (once per machine)
+totp-setup:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    read -rsp "tpm2-totp recovery password: " pw; echo
+    {{ root }} tpm2-totp -p {{ totp_pcrs }} -b SHA256 -l "TPM2-TOTP {{ host }}" -P "$pw" generate
+
+# re-seal the boot TOTP to the current PCR values (after a BIOS update etc.)
+totp-reseal:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    read -rsp "tpm2-totp recovery password: " pw; echo
+    {{ root }} tpm2-totp -p {{ totp_pcrs }} -b SHA256 -P "$pw" reseal
+
+# show the current boot TOTP (compare with the authenticator app)
+totp:
+    {{ root }} tpm2-totp -t calculate
+
 # evaluate every host
 check: stage
     nix flake check
