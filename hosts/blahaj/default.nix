@@ -23,6 +23,10 @@
   # boot menu and early console aren't low-res.
   boot.loader.systemd-boot.consoleMode = "max";
 
+  # Hibernate target (34G encrypted swap, 31G RAM). The systemd initrd only
+  # resumes from resume= or the EFI HibernateLocation variable.
+  boot.resumeDevice = "/dev/mapper/luks-5125b327-06ff-4cbc-b8b2-5c55603f71de";
+
   # early KMS so Plymouth comes up at native resolution without a mode switch
   # (gnocchi gets xe from nixos-hardware)
   boot.initrd.kernelModules = [ "amdgpu" ];
