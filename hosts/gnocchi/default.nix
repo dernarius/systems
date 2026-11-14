@@ -5,6 +5,7 @@
   imports = [
     inputs.nixos-hardware.nixosModules.lenovo-thinkpad-t14-intel-gen6
     ./hardware-configuration.nix
+    ../common/secure-boot.nix
   ];
 
   networking.hostName = "gnocchi";
