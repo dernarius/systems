@@ -11,6 +11,19 @@
   # no kernel cmdline editing at the boot menu (init=/bin/sh etc.)
   boot.loader.systemd-boot.editor = false;
   boot.loader.efi.canTouchEfiVariables = true;
+
+  # systemd initrd + Plymouth: graphical LUKS prompt, and the path to
+  # FIDO2/YubiKey (systemd-cryptenroll) and Secure Boot (lanzaboote) later
+  boot.initrd.systemd.enable = true;
+  boot.plymouth.enable = true;
+  # silent boot; everything still lands in the journal
+  boot.consoleLogLevel = 3;
+  boot.initrd.verbose = false;
+  boot.kernelParams = [
+    "quiet"
+    "udev.log_level=3"
+    "systemd.show_status=auto"
+  ];
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
   nixpkgs.config.allowUnfree = true;

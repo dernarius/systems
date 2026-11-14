@@ -11,6 +11,11 @@
 
   boot.kernelParams = [ "zswap.enabled=1" ];
 
+  # Hibernate target. The scripted initrd probed swapDevices for an image on
+  # its own; the systemd initrd only resumes from resume= or the EFI
+  # HibernateLocation variable, so name it explicitly.
+  boot.resumeDevice = "/dev/mapper/luks-079c0b46-cfb3-4ebc-9dcb-d54f0e27a75b";
+
   services.hardware.bolt.enable = true;
 
   services.logind.settings.Login = {
