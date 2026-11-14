@@ -17,6 +17,10 @@ stage:
 switch: stage
     {{ root }} nixos-rebuild switch --flake .#{{ host }}
 
+# rebuild and switch this machine, reinstall booloader
+switch-w-bootloader: stage
+    {{ root }} nixos-rebuild switch --flake .#{{ host }} --install-bootloader
+
 # rebuild and activate on next boot only
 boot: stage
     {{ root }} nixos-rebuild boot --flake .#{{ host }}

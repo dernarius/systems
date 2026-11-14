@@ -15,6 +15,10 @@
     "usb-storage.quirks=152d:0562:u"
   ];
 
+  # BIOS P10.60 hands over an 800x600 GOP mode; ask for the highest one so the
+  # boot menu and early console aren't low-res.
+  boot.loader.systemd-boot.consoleMode = "max";
+
   hardware.cpu.amd.updateMicrocode = true;
   hardware.enableAllFirmware = true;
   hardware.xpadneo.enable = true;
