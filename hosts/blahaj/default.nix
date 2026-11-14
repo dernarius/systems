@@ -5,6 +5,7 @@
   imports = [
     ./hardware-configuration.nix
     ./tv-mode.nix
+    ../common/secure-boot.nix
   ];
 
   networking.hostName = "blahaj";

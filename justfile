@@ -43,6 +43,10 @@ update *inputs: stage
 rollback:
     {{ root }} nixos-rebuild switch --rollback
 
+# boot into the firmware setup on the next reboot (no reboot now; `false` cancels)
+firmware on="true":
+    {{ root }} bootctl reboot-to-firmware {{ on }}
+
 # evaluate every host
 check: stage
     nix flake check

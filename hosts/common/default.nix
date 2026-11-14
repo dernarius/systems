@@ -81,6 +81,8 @@
   environment.systemPackages = [
     pkgs.git
     pkgs.age
+    # Secure Boot key management (see ./secure-boot.nix)
+    pkgs.sbctl
   ];
 
   # zsh isn't managed by home-manager, so shell hooks are set up system-wide
