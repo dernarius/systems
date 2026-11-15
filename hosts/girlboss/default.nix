@@ -68,6 +68,8 @@
     zellij
     flac
     tree-sitter
+    just
+    shpool
   ];
 
   services.openssh.enable = true;
