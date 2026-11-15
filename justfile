@@ -99,8 +99,8 @@ stash host:
 anywhere-test host: stage
     nix run github:nix-community/nixos-anywhere/{{ anywhere_version }} -- --flake .#{{ host }} --vm-test
 
-# REINSTALL a host over SSH: WIPES the disks in its disko.nix
-anywhere host target: stage
+# REINSTALL a host over SSH: WIPES the disks in its disko.nix (identity: ssh key for the connection)
+anywhere host target identity="": stage
     #!/usr/bin/env bash
     set -euo pipefail
     read -rp "This wipes {{ host }}'s system disk at {{ target }}. Type the host name to go on: " ok
@@ -109,8 +109,21 @@ anywhere host target: stage
     read -rsp "again: " pw2; echo
     [ "$pw" = "$pw2" ] || { echo "passphrases differ"; exit 1; }
     extra=()
+    # accept `identity=~/...` too and expand a quoted ~
+    id="{{ identity }}"
+    id="${id#identity=}"
+    id="${id/#\~/$HOME}"
+    if [ -n "$id" ]; then
+        [ -r "$id" ] || { echo "can't read ssh key $id"; exit 1; }
+        # nixos-anywhere copies the key and connects many times; unlock a
+        # passphrase-protected key once in the agent instead of every time
+        if ! ssh-keygen -y -P "" -f "$id" >/dev/null 2>&1; then
+            ssh-add "$id"
+        fi
+        extra+=(-i "$id")
+    fi
     if [ -d ~/stash/{{ host }} ]; then
-        extra=(--extra-files ~/stash/{{ host }} --chown /home/stk 1000:100)
+        extra+=(--extra-files ~/stash/{{ host }} --chown /home/stk 1000:100)
     fi
     nix run github:nix-community/nixos-anywhere/{{ anywhere_version }} -- \
         --flake .#{{ host }} --target-host {{ target }} \

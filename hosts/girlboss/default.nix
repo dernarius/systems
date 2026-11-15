@@ -31,6 +31,10 @@
   # Pinned: files on the pool are owned by these numbers, and a reinstall
   # would otherwise hand out whatever ids are free.
   users.users.stk.uid = 1000;
+  # ~/.ssh/girlboss on the other machines; added to the keys in ../common
+  users.users.stk.openssh.authorizedKeys.keys = [
+    "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDFwcGZG5qJRd1brDh4OuEB4a3UtyJVow8wTyyXu7+lCvdUtEFGpoOu18RyRkpRg7b/rZSboPRltD5LMjZb10Sz4WS68k9b71MufkzT0x/3ZmUoQHByoqR+Dk/LwZ83LeH4I1a/06HyZ+il8WLbaOdzk7YU2IqWX7idcnJXzEE/a0acOiENHlngWTAgPydMP9+66t5IZylOSK2oc+LfaC37cj34qW/MIK3nsDVNSfnBJT4bATiP3y63jzpceqP2Ioxw9gigK2Xf3LM8pAjkWBxOYEIIyMLvZC9AYykeUeV0EDtd7zOzkVF6mF39qoYVd49l3zQI8zm/UenKnqhrijzRhg4d8BvFHBEB7WQMk2ms1bg8Htt/esaxPNnQ12OoFjKYjeNZIqagH4G109GbUXAAh89vzLIbfC34IDWNJ8uHamVas77YuNNau9mMxTV8G/ThJXSrqmnhZxaZuAgHI4NHmWYLA5O57GLuYFDbSElqFy6TP2NOMQRg1xEYRKjAkVk= stk@longitude"
+  ];
   users.users.server = {
     isSystemUser = true;
     description = "server";
