@@ -57,6 +57,8 @@
 
   environment.systemPackages = with pkgs; [
     ncdu
+    # progress bars for long pipes (zfs send)
+    pv
     unzip
     wget
     zfs
@@ -72,6 +74,15 @@
 
   # docker (and `docker compose`) comes from virtualisation.docker in common
   virtualisation.docker.daemon.settings.dns = [ "192.168.88.1" ];
+  # containers bind-mount /mnt/newtent; don't start them against empty
+  # directories before the pool is imported, its key loaded and mounted
+  systemd.services.docker = {
+    wants = [ "zfs-mount.service" ];
+    after = [
+      "zfs-import-newtent.service"
+      "zfs-mount.service"
+    ];
+  };
 
   networking.firewall.enable = false;
 
