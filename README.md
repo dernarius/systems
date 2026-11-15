@@ -1,19 +1,27 @@
 # systems
 
 One flake for every machine, with home-manager running as a NixOS module so a
-single `nixos-rebuild` updates the system and `~` together.
+single `nixos-rebuild` updates the system and `~` together. Desktops are built
+with `mkDesktop` (common + desktop + home-manager), headless machines with
+`mkHost` (common only).
 
 ```
 flake.nix
 justfile             every command below; `just` lists them
 hosts/
-  common/            NixOS settings every machine needs (boot, nix, user, greetd,
-                     swayfx, pipewire, docker, tailscale, keyd, steam, ...)
+  common/            NixOS settings every machine needs (boot, nix, user, docker,
+                     tailscale, avahi, ...)
+    desktop.nix      graphical machines only: greetd, swayfx, pipewire,
+                     bluetooth, keyd, thunar, steam (gaming.nix)
+    secure-boot.nix  lanzaboote + boot TOTP, imported per host
+    serial-totp.nix  boot TOTP as text lines on a serial/USB-serial port (headless)
   gnocchi/           ThinkPad: nixos-hardware, tlp, lid/upower, fprint, ollama-vulkan
     home.nix         laptop-only home bits: kanshi, batsignal, touchpad, battery
   blahaj/            desktop: AMD, xpadneo, ratbagd, sshd, ollama-rocm, TV mode
     home.nix         desktop-only home bits: kanshi monitors, amdgpu_top, piper
     audio-toggle.nix toggle-audio-output between the two DACs
+  girlboss/          headless NAS: ZFS pool `newtent`, docker compose services,
+                     dnsmasq for tailscale; no desktop, no home-manager
 
 home/
   default.nix        the full home config: core + packages + backup

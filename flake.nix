@@ -1,5 +1,5 @@
 {
-  description = "NixOS + home-manager configs for gnocchi (laptop), blahaj (desktop) and a rescue installer";
+  description = "NixOS + home-manager configs for gnocchi (laptop), blahaj (desktop) and girlboss (headless NAS)";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-26.05";
@@ -32,33 +32,39 @@
       };
       specialArgs = { inherit inputs pkgs-unstable; };
 
-      # `home` is the home-manager config for stk: the full one on real
-      # machines, just the desktop core on the installer
       mkHost =
-        hostModule: home:
+        modules:
         nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
-          modules = [
-            ./hosts/common
-            hostModule
-            home-manager.nixosModules.home-manager
-            {
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                # existing hand-written dotfiles get moved aside instead of blocking activation
-                backupFileExtension = "hm-bak";
-                extraSpecialArgs = specialArgs;
-                users.stk.imports = [ home ];
-              };
-            }
-          ];
+          modules = [ ./hosts/common ] ++ modules;
         };
+
+      # graphical machines: desktop module + home-manager for stk, with `home`
+      # as the home-manager config
+      mkDesktop =
+        hostModule: home:
+        mkHost [
+          ./hosts/common/desktop.nix
+          hostModule
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              # existing hand-written dotfiles get moved aside instead of blocking activation
+              backupFileExtension = "hm-bak";
+              extraSpecialArgs = specialArgs;
+              users.stk.imports = [ home ];
+            };
+          }
+        ];
     in
     {
       nixosConfigurations = {
-        gnocchi = mkHost ./hosts/gnocchi ./home;
-        blahaj = mkHost ./hosts/blahaj ./home;
+        gnocchi = mkDesktop ./hosts/gnocchi ./home;
+        blahaj = mkDesktop ./hosts/blahaj ./home;
+        # headless, no home-manager
+        girlboss = mkHost [ ./hosts/girlboss ];
       };
 
       formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-tree;
