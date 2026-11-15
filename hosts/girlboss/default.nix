@@ -1,14 +1,21 @@
 # Headless NAS: ZFS pool `newtent` holds all the data, services run from a
 # docker compose file on it. No desktop, no home-manager.
 #
-# Later (once there's a YubiKey): import ../common/secure-boot.nix, LUKS the
-# system drive and move the data to an encrypted dataset. With no screen, the
-# boot TOTP goes to the RS-232 header instead: import ../common/serial-totp.nix
-# and set `boot.serialTotp.enable = true;` (ttyS0, 9600 8N1 by default; USB serial works too, see the module).
-{ pkgs, ... }:
+# The system SSD is LUKS (./disko.nix), installed with nixos-anywhere; see
+# the README. Later, once there's a YubiKey: enroll it with
+# systemd-cryptenroll, import ../common/secure-boot.nix, and move the data to
+# an encrypted dataset. With no screen, the boot TOTP goes to a serial port
+# instead: import ../common/serial-totp.nix and set
+# `boot.serialTotp.enable = true;` (ttyS0, 9600 8N1 by default; USB serial
+# works too, see the module).
+{ inputs, pkgs, ... }:
 
 {
-  imports = [ ./hardware-configuration.nix ];
+  imports = [
+    inputs.disko.nixosModules.disko
+    ./disko.nix
+    ./hardware-configuration.nix
+  ];
 
   networking.hostName = "girlboss";
   # required by ZFS; must not change or the pool won't import
@@ -21,18 +28,16 @@
   # root is ext4, so this only matters once the system drive moves to ZFS
   boot.zfs.forceImportRoot = false;
 
-  users.users.mro = {
-    isNormalUser = true;
-    description = "mro";
-    shell = pkgs.zsh;
-  };
-
+  # Pinned: files on the pool are owned by these numbers, and a reinstall
+  # would otherwise hand out whatever ids are free.
+  users.users.stk.uid = 1000;
   users.users.server = {
     isSystemUser = true;
     description = "server";
+    uid = 993;
     group = "server";
   };
-  users.groups.server = { };
+  users.groups.server.gid = 991;
 
   security.sudo.extraRules = [
     {

@@ -22,6 +22,7 @@ hosts/
     audio-toggle.nix toggle-audio-output between the two DACs
   girlboss/          headless NAS: ZFS pool `newtent`, docker compose services,
                      dnsmasq for tailscale; no desktop, no home-manager
+    disko.nix        system SSD layout: ESP, random-key swap, LUKS ext4 root
 
 home/
   default.nix        the full home config: core + packages + backup
@@ -59,6 +60,35 @@ compiled on every machine with every update. Instead it's wrapped with
 builds it (with a notification) and keeps it under `~/.local/state/lazy`.
 The build log is next to it. Any other heavy package can be wrapped the
 same way in `home/packages.nix`.
+
+## Reinstalling girlboss (nixos-anywhere)
+
+girlboss is installed over SSH: nixos-anywhere kexecs it into an installer
+in RAM, disko wipes and partitions the system SSD from
+`hosts/girlboss/disko.nix`, then NixOS is installed from this flake. The ZFS
+pool drives aren't in the disko config and are never touched.
+
+```sh
+just anywhere-test girlboss          # build it, check disko's layout in a VM
+# on girlboss: stop the compose stack, then `sudo zpool export newtent`
+just stash girlboss                  # tailscale state + ~stk -> ~/stash/girlboss
+just anywhere girlboss stk@192.168.88.247
+```
+
+- Use the LAN IP: after kexec there's no tailscale and no MagicDNS.
+- `anywhere` asks for the new LUKS passphrase, keeps the SSH host keys
+  (`--copy-host-keys`) and copies `~/stash/<host>` into the new system.
+- If the installer sees the TPM, a TPM2 slot (PCR 7) is enrolled next to the
+  passphrase, so the box reboots unattended. Without one, the first boot
+  waits for the passphrase on a keyboard.
+- Anything else on the old system drive is gone: check the docker volumes
+  (`docker volume ls`) before.
+
+After the YubiKey arrives:
+`systemd-cryptenroll --fido2-device=auto /dev/disk/by-partlabel/disk-system-root`
+and `--wipe-slot=tpm2` if the TPM slot should go. Turning on Secure Boot
+changes PCR 7: unlock with the passphrase once, then re-enroll the TPM with
+`--wipe-slot=tpm2 --tpm2-device=auto --tpm2-pcrs=7`.
 
 ## Backups
 

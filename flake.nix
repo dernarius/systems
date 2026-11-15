@@ -9,6 +9,11 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # declarative partitioning (girlboss, installed with nixos-anywhere)
+    disko = {
+      url = "github:nix-community/disko/v1.13.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     # Secure Boot; track release tags, not main
     lanzaboote = {
       url = "github:nix-community/lanzaboote/v1.2.0";

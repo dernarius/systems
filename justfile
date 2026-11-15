@@ -85,6 +85,39 @@ gc:
 repl:
     nix repl .
 
+### reinstalling over SSH (nixos-anywhere + disko)
+
+anywhere_version := "1.13.0"
+
+# copy the state that lives only on a host's system drive to ~/stash/<host>
+stash host:
+    mkdir -p ~/stash/{{ host }}
+    ssh {{ host }} 'sudo tar -C / -cpf - var/lib/tailscale home/stk' | tar -C ~/stash/{{ host }} -xpf -
+    du -sh ~/stash/{{ host }}/*
+
+# build a host and boot its disko layout in a VM, without touching the target
+anywhere-test host: stage
+    nix run github:nix-community/nixos-anywhere/{{ anywhere_version }} -- --flake .#{{ host }} --vm-test
+
+# REINSTALL a host over SSH: WIPES the disks in its disko.nix
+anywhere host target: stage
+    #!/usr/bin/env bash
+    set -euo pipefail
+    read -rp "This wipes {{ host }}'s system disk at {{ target }}. Type the host name to go on: " ok
+    [ "$ok" = "{{ host }}" ] || { echo "aborted"; exit 1; }
+    read -rsp "new disk passphrase: " pw; echo
+    read -rsp "again: " pw2; echo
+    [ "$pw" = "$pw2" ] || { echo "passphrases differ"; exit 1; }
+    extra=()
+    if [ -d ~/stash/{{ host }} ]; then
+        extra=(--extra-files ~/stash/{{ host }} --chown /home/stk 1000:100)
+    fi
+    nix run github:nix-community/nixos-anywhere/{{ anywhere_version }} -- \
+        --flake .#{{ host }} --target-host {{ target }} \
+        --copy-host-keys \
+        --disk-encryption-keys /tmp/luks.key <(printf '%s' "$pw") \
+        "${extra[@]}"
+
 ### backups
 
 # the duplicity URL a host's config backs up to

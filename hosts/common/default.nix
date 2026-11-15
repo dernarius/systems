@@ -18,7 +18,7 @@
   boot.initrd.systemd.enable = true;
   boot.plymouth.enable = true;
   # silent boot; everything still lands in the journal
-  boot.consoleLogLevel = 3;
+  boot.consoleLogLevel = lib.mkDefault 3;
   boot.initrd.verbose = false;
   boot.kernelParams = [
     "quiet"
