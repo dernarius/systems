@@ -71,6 +71,7 @@
     pkgs.age
     # Secure Boot key management (see ./secure-boot.nix)
     pkgs.sbctl
+    pkgs.just
   ];
 
   # zsh isn't managed by home-manager, so shell hooks are set up system-wide
