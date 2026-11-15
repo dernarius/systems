@@ -18,6 +18,7 @@
 let
   keyFile = "/tmp/luks.key";
   luksPart = "/dev/disk/by-partlabel/disk-system-root";
+  espPart = "/dev/disk/by-partlabel/disk-system-ESP";
 in
 {
   disko.devices.disk.system = {
@@ -36,6 +37,14 @@ in
             format = "vfat";
             mountpoint = "/boot";
             mountOptions = [ "umask=0077" ];
+            # disko skips mkfs if blkid finds any filesystem, and this SSD had
+            # an old ext4 signature where the new ESP starts; clear anything
+            # that isn't already vfat
+            preCreateHook = ''
+              if ! blkid -t TYPE=vfat ${espPart} >/dev/null; then
+                wipefs --all ${espPart}
+              fi
+            '';
           };
         };
         swap = {

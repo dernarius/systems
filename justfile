@@ -99,8 +99,8 @@ stash host:
 anywhere-test host: stage
     nix run github:nix-community/nixos-anywhere/{{ anywhere_version }} -- --flake .#{{ host }} --vm-test
 
-# REINSTALL a host over SSH: WIPES the disks in its disko.nix (identity: ssh key for the connection)
-anywhere host target identity="": stage
+# REINSTALL a host over SSH: WIPES the disks in its disko.nix (identity: ssh key; anything after goes to nixos-anywhere)
+anywhere host target identity="" *args: stage
     #!/usr/bin/env bash
     set -euo pipefail
     read -rp "This wipes {{ host }}'s system disk at {{ target }}. Type the host name to go on: " ok
@@ -129,7 +129,7 @@ anywhere host target identity="": stage
         --flake .#{{ host }} --target-host {{ target }} \
         --copy-host-keys \
         --disk-encryption-keys /tmp/luks.key <(printf '%s' "$pw") \
-        "${extra[@]}"
+        "${extra[@]}" {{ args }}
 
 ### backups
 
