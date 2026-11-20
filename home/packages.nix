@@ -1,6 +1,7 @@
 # Everything beyond the desktop core: apps, dev tools, games.
 {
   config,
+  inputs,
   pkgs,
   pkgs-unstable,
   ...
@@ -134,7 +135,10 @@ in
         };
       })
     ])
-    ++ [ rip ]
+    ++ [
+      rip
+      inputs.autolith.packages.${pkgs.stdenv.hostPlatform.system}.default
+    ]
     ++ (with pkgs-unstable; [
       boilr
       claude-code

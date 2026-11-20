@@ -19,6 +19,9 @@
       url = "github:nix-community/lanzaboote/v1.2.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Common Lisp terminal agent; keeps its own tested nixpkgs pin so
+    # symbolics.cachix.org hits (see hosts/common/desktop.nix). Track release tags.
+    autolith.url = "github:lambda-symbolics/autolith/v0.67.57";
   };
 
   outputs =
