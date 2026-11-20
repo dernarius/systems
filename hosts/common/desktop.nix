@@ -8,6 +8,14 @@
 
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
+  # prebuilt autolith (github:lambda-symbolics/autolith)
+  nix.settings = {
+    extra-substituters = [ "https://symbolics.cachix.org" ];
+    extra-trusted-public-keys = [
+      "symbolics.cachix.org-1:Wdgpxequ4fzP4FAckIf4MqMG9OpNxWz6CttNwiGf4AI="
+    ];
+  };
+
   networking.firewall.allowedTCPPorts = [
     # development stuff (8080 is also the TV mode switcher API on blahaj)
     6969
